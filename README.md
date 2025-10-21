@@ -1,13 +1,13 @@
 # 🚀 Space Station Safety Detection — YOLOv8
 
-A lightweight and portable **YOLOv8-based object detection pipeline** to detect critical safety equipment aboard a space station environment or industrial setup.
+A lightweight and portable **YOLOv8-based object detection pipeline** to detect critical safety equipment in space-station–style or industrial environments.
 
 ---
 
-## 👥 Team Information
+## 👥 Team
 
 - **Team Name:** Tech Syndicate  
-- **Team Members:**  
+- **Members:**  
   - Rahul Kala  
   - Ravinder Singh
 
@@ -15,52 +15,53 @@ A lightweight and portable **YOLOv8-based object detection pipeline** to detect 
 
 ## 📁 Project Structure
 
+```
 GenIgnite/
 ├─ README.md
-├─ Hackathon2_scripts/
-│ ├─ train.py
-│ ├─ predict.py
-│ ├─ generate_report.py
-│ ├─ visualize.py
-│ ├─ yolo_params.yaml
-│ └─ ENV_SETUP/
-│ └─ classes.txt
+├─ Hackathon2_scripts/                 # Core project scripts
+│  ├─ train.py                         # Adaptive YOLOv8 training
+│  ├─ predict.py                       # Single/batch inference
+│  ├─ generate_report.py               # CSV + bar chart reporting
+│  ├─ visualize.py                     # (Optional visualization tools)
+│  ├─ yolo_params.yaml                 # Dataset config (relative paths)
+│  └─ ENV_SETUP/
+│     └─ classes.txt                   # Class names (1 per line)
 │
-└─ Hackathon2_test/ # 📂 Place your dataset here (not in repo)
-├─ train/
-│ ├─ images/
-│ └─ labels/
-├─ val/
-│ ├─ images/
-│ └─ labels/
-└─ test/
-├─ images/
-└─ labels/
+└─ Hackathon2_test/                    # 📂 Place dataset here (not in repo)
+   ├─ train/
+   │  ├─ images/
+   │  └─ labels/
+   ├─ val/
+   │  ├─ images/
+   │  └─ labels/
+   └─ test/
+      ├─ images/
+      └─ labels/
+```
 
-
-⚠️ **Note:**  
-The dataset (`Hackathon2_test`) is **not included** in the repository.  
-Each user or evaluator must manually place their dataset in this folder.
+> ⚠️ **Note:** The dataset folder `Hackathon2_test` is **not committed**. Place it manually as shown above.
 
 ---
 
 ## 🧰 Requirements
 
-- Python 3.10+
-- GPU optional (CUDA recommended)
-- Install dependencies:
+- Python **3.10+**  
+- GPU optional (**CUDA recommended**)
 
 ```bash
 pip install -U ultralytics matplotlib requests
+```
 
+👉 For GPU acceleration, install CUDA-enabled PyTorch from:  
+https://pytorch.org
 
-(For GPU acceleration, install the correct CUDA-enabled PyTorch from https://pytorch.org
-).
+---
 
-🧠 Dataset Configuration
+## 🧠 Dataset Configuration
 
-Hackathon2_scripts/yolo_params.yaml
+**File:** `Hackathon2_scripts/yolo_params.yaml`
 
+```yaml
 path: ../Hackathon2_test
 train: train/images
 val:   val/images
@@ -68,8 +69,11 @@ test:  test/images
 
 nc: 7
 names: ['OxygenTank','NitrogenTank','FirstAidBox','FireAlarm','SafetySwitchPanel','EmergencyPhone','FireExtinguisher']
+```
 
-Folder Format:
+**Folder format:**
+
+```
 Hackathon2_test/
 ├─ train/
 │  ├─ images/
@@ -80,131 +84,137 @@ Hackathon2_test/
 └─ test/
    ├─ images/
    └─ labels/
+```
 
-
-Each .txt file (YOLO label) contains:
-
+**Label format (YOLO):**
+```
 <class_id> <x_center> <y_center> <width> <height>
+```
+_All coordinates are normalized to `[0, 1]`._
 
+---
 
-All coordinates are normalized between 0 and 1.
+## 🧪 Training
 
-🧪 Training
-python Hackathon2_scripts/train.py \
-  --yaml Hackathon2_scripts/yolo_params.yaml \
-  --weights weights/yolov8n.pt \
-  --results runs/detect
+```bash
+python Hackathon2_scripts/train.py   --yaml Hackathon2_scripts/yolo_params.yaml   --weights weights/yolov8n.pt   --results runs/detect
+```
 
+**Features:**
+- ✅ Auto-downloads weights if missing  
+- ✅ Adapts image size & batch size for low-VRAM GPUs  
+- ✅ Saves results in `runs/detect/train_auto/`
 
-✅ Auto-downloads weights if missing
-✅ Auto-adjusts image & batch size for low-VRAM GPUs
-✅ Saves results in runs/detect/train_auto/
+---
 
-🔍 Prediction (Inference)
-📁 Predict on entire test set
-python Hackathon2_scripts/predict.py \
-  --weights runs/detect/train_auto/weights/best.pt \
-  --source Hackathon2_test/test/images \
-  --out-images predictions/images \
-  --out-labels predictions/labels \
-  --conf 0.25 --imgsz 640 --iou 0.45 --augment
+## 🔍 Prediction (Inference)
 
-🖼️ Predict on single image
-python Hackathon2_scripts/predict.py \
-  --weights runs/detect/train_auto/weights/best.pt \
-  --source Hackathon2_test/test/images/example.png
+### 📁 Predict on entire test set
 
+```bash
+python Hackathon2_scripts/predict.py   --weights runs/detect/train_auto/weights/best.pt   --source Hackathon2_test/test/images   --out-images predictions/images   --out-labels predictions/labels   --conf 0.25 --imgsz 640 --iou 0.45 --augment
+```
 
-📤 Output:
+### 🖼️ Predict on single image
 
-Annotated images → predictions/images
+```bash
+python Hackathon2_scripts/predict.py   --weights runs/detect/train_auto/weights/best.pt   --source Hackathon2_test/test/images/example.png
+```
 
-YOLO-format label files (with confidence) → predictions/labels
+**Outputs:**
+- Annotated images → `predictions/images`  
+- YOLO-format labels (with confidence) → `predictions/labels`
 
-📊 Report Generation
+---
 
-Using YAML:
+## 📊 Report Generation
 
-python Hackathon2_scripts/generate_report.py \
-  --pred predictions \
-  --yaml Hackathon2_scripts/yolo_params.yaml \
-  --out runs/report \
-  --min-conf 0.25
+Create automatic CSVs, a text summary, and a bar chart of class counts.
 
+**Using YAML:**
 
-Using classes.txt:
+```bash
+python Hackathon2_scripts/generate_report.py   --pred predictions   --yaml Hackathon2_scripts/yolo_params.yaml   --out runs/report   --min-conf 0.25
+```
 
-python Hackathon2_scripts/generate_report.py \
-  --pred predictions \
-  --classes Hackathon2_scripts/ENV_SETUP/classes.txt \
-  --out runs/report
+**Or using classes.txt:**
 
+```bash
+python Hackathon2_scripts/generate_report.py   --pred predictions   --classes Hackathon2_scripts/ENV_SETUP/classes.txt   --out runs/report
+```
 
-📈 Output (runs/report/):
+**Report files (in `runs/report`):**
+- `report_images.csv` — per-image detections  
+- `report_classes.csv` — per-class count + avg confidence  
+- `report_summary.txt` — human-readable summary  
+- `report_bar.png` — bar chart of class distribution
 
-report_images.csv     # per image
-report_classes.csv    # per class count + avg confidence
-report_summary.txt    # human-readable summary
-report_bar.png        # bar chart
+---
 
-🪪 Classes
-ID	Class Name
-0	OxygenTank
-1	NitrogenTank
-2	FirstAidBox
-3	FireAlarm
-4	SafetySwitchPanel
-5	EmergencyPhone
-6	FireExtinguisher
-⚡ Quick Start
-# 1. Place dataset at:
+## 🪪 Classes
+
+| ID | Class Name         |
+|----|--------------------|
+| 0  | OxygenTank         |
+| 1  | NitrogenTank       |
+| 2  | FirstAidBox        |
+| 3  | FireAlarm          |
+| 4  | SafetySwitchPanel  |
+| 5  | EmergencyPhone     |
+| 6  | FireExtinguisher   |
+
+---
+
+## ⚡ Quick Start
+
+```bash
+# 1) Place dataset
 #    GenIgnite/Hackathon2_test/
 
-# 2. Install dependencies
+# 2) Install dependencies
 pip install -U ultralytics matplotlib requests
 
-# 3. Train
+# 3) Train
 python Hackathon2_scripts/train.py --yaml Hackathon2_scripts/yolo_params.yaml
 
-# 4. Predict
-python Hackathon2_scripts/predict.py \
-  --weights runs/detect/train_auto/weights/best.pt \
-  --source Hackathon2_test/test/images
+# 4) Predict
+python Hackathon2_scripts/predict.py   --weights runs/detect/train_auto/weights/best.pt   --source Hackathon2_test/test/images
 
-# 5. Report
-python Hackathon2_scripts/generate_report.py \
-  --pred predictions \
-  --yaml Hackathon2_scripts/yolo_params.yaml \
-  --out runs/report
+# 5) Report
+python Hackathon2_scripts/generate_report.py   --pred predictions   --yaml Hackathon2_scripts/yolo_params.yaml   --out runs/report
+```
 
-📌 Notes
+---
 
-No dataset is committed to the repo.
+## 📌 Notes
 
-Dataset folder must be named Hackathon2_test and placed next to Hackathon2_scripts.
+- Dataset is **not** included in the repo.  
+- Folder name must be `Hackathon2_test` placed next to `Hackathon2_scripts`.  
+- All paths are relative — no OS-specific hardcoded paths.  
+- Compatible with low-VRAM GPUs (~4 GB) using auto-adjusted batch/img sizes.
 
-All paths are relative — no hardcoded Windows paths.
+---
 
-Compatible with low-VRAM GPUs (e.g., 4 GB).
+## 🏁 Hackathon Context
 
-🏁 Hackathon Context
+Developed by **Team Tech Syndicate** for a hackathon focusing on:
 
-This project was developed by Team Tech Syndicate for a hackathon challenge focusing on:
+- 🚀 Lightweight & portable deep-learning pipeline  
+- ⚡ Real-time object detection (YOLOv8)  
+- 📊 Automated reporting for easy evaluation
 
-🚀 Lightweight & portable deep learning pipeline
+---
 
-⚡ Real-time object detection (YOLOv8)
+## 📜 License
 
-📊 Automated reporting for evaluation
+- **Code:** Open for educational and research use.  
+- **Dataset:** Not included — you must provide your own dataset under `Hackathon2_test/`.
 
-📜 License
+---
 
-Code: Open for educational and research use.
+## 🙌 Contributors
 
-Dataset: Not included. Users must provide their own dataset under Hackathon2_test/.
+- Rahul Kala  
+- Ravinder Singh
 
-🙌 Contributors
-
-Rahul Kala
-
-Ravinder Singh
+---
